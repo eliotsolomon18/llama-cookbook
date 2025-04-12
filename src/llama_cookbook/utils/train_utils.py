@@ -127,8 +127,9 @@ def train(model, train_dataloader,eval_dataloader, tokenizer, optimizer, lr_sche
             model.train()
             total_loss = 0.0
             total_length = len(train_dataloader)//gradient_accumulation_steps
-            pbar = tqdm(colour="blue", desc=f"Training Epoch: {epoch+1}", total=total_length, dynamic_ncols=True)
+            # pbar = tqdm(colour="blue", desc=f"Training Epoch: {epoch+1}", total=total_length, dynamic_ncols=True)
             with profile(train_config,local_rank) as profile_context:
+                before = time.time()
                 for step, batch in enumerate(train_dataloader):
                     total_train_steps += 1
                     # stop when the maximum number of training steps is reached
@@ -168,7 +169,7 @@ def train(model, train_dataloader,eval_dataloader, tokenizer, optimizer, lr_sche
                             scaler.step(optimizer)
                             scaler.update()
                             optimizer.zero_grad()
-                            pbar.update(1)
+                            # pbar.update(1)
                     else:
                         # regular backpropagation when fp16 is not used
                         loss.backward()
@@ -180,7 +181,10 @@ def train(model, train_dataloader,eval_dataloader, tokenizer, optimizer, lr_sche
                                     torch.nn.utils.clip_grad_norm_(model.parameters(), train_config.gradient_clipping_threshold)
                             optimizer.step()
                             optimizer.zero_grad()
-                            pbar.update(1)
+                            after = time.time()
+                            print(before, after - before)
+                            before = after
+                            # pbar.update(1)
                     if train_config.use_profiler or train_config.flop_counter:
                         profile_context.step()
                     if train_config.flop_counter and profile_context.is_done():
@@ -193,11 +197,11 @@ def train(model, train_dataloader,eval_dataloader, tokenizer, optimizer, lr_sche
                                 'train/loss': loss.detach().float(),
                             })
 
-                    pbar.set_description(f"Training Epoch: {epoch+1}/{train_config.num_epochs}, step {step}/{len(train_dataloader)} completed (loss: {loss.detach().float()})")
+                    # pbar.set_description(f"Training Epoch: {epoch+1}/{train_config.num_epochs}, step {step}/{len(train_dataloader)} completed (loss: {loss.detach().float()})")
 
                     if train_config.save_metrics:
                         save_to_json(metrics_filename, train_step_loss, train_loss, train_step_perplexity, train_prep, val_step_loss, val_loss, val_step_perplexity, val_prep)
-                pbar.close()
+                # pbar.close()
 
         epoch_end_time = time.perf_counter()-epoch_start_time
         epoch_times.append(epoch_end_time)
