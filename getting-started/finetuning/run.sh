@@ -12,4 +12,4 @@ python3 $SCRIPT_DIR/finetuning.py \
     --quantization 8bit \
     --model_name ~/mlos/third-party/bench-nn/opt/Meta-Llama-3-8B \
     --output_dir $SCRIPT_DIR/output/ \
-    --context_length 512 \
+    --context_length 512 "$@"
