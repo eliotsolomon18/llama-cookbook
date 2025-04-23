@@ -10,6 +10,6 @@ python3 $SCRIPT_DIR/finetuning.py \
     --use_peft \
     --peft_method lora \
     --quantization 8bit \
-    --model_name ~/mlos/third-party/bench-nn/opt/Meta-Llama-3-8B \
+    --model_name /data/nn/models/Meta-Llama-3-8B \
     --output_dir $SCRIPT_DIR/output/ \
     --context_length 512 "$@"
